@@ -1,14 +1,8 @@
-from alpine/git as clone
+from golang:1.11-alpine
+run mkdir/app
+copy main.go /app
 workdir /app
-run git clone --single-branch -b master https://da71658cd2e14635af91bf9b848e62af3932364c@github.com/garg10may/idot.git
-
-from maven:3.5-jdk-8-alpine as build
-workdir /app
-copy --from=0 /app/idot/idot-backend /app
-run mvn install:install-file -Dfile=/app/ojdbc8.jar -DgroupId=com.oracle -DartifactId=ojdbc8 -Dversion=12.2.0.1 -Dpackaging=jar
-run mvn clean install -T 1C -DskipTests
-
-from openjdk:8-jre-alpine
-workdir /app
-copy --from=build /app/target/idot-0.0.1-SNAPSHOT.jar /app
-cmd ["java -jar idot-0.0.1-SNAPSHOT.jar"]
+run go build -0 main .
+expose 8080 8888
+user 1001
+entrypoint ["/app/main"]
